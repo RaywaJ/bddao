@@ -1,0 +1,115 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ *
+ * @author Stefano
+ */
+public class SqlServerDAO implements IBancoDAO {
+
+    public Connection connection = null;
+    public Statement smt;
+
+    public SqlServerDAO() {
+        // configurações do banco de dados
+        String DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+        String DATABASE_URL = "jdbc:sqlserver://localhost:1433;databaseName=ExercicioJDBC;trustServerCertificate=true";
+
+        try {
+            Class.forName(DRIVER); // Carrega o Driver
+            connection = DriverManager.getConnection(DATABASE_URL, "sa", "raywa");
+            smt = connection.createStatement();
+            System.out.println("Conectou com o banco de dados");
+        } catch (SQLException | ClassNotFoundException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    @Override
+    public void SalvarPessoa(Pessoa p) {
+        try {
+            smt.executeUpdate("insert into pessoa (nome, contato) values ('" + p.nome + "','" + p.contato + "')");
+            System.out.println("Inseriu uma pessoa");
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    @Override
+    public void ExcluirPessoa(Pessoa p) {
+        try {
+            smt.executeUpdate("delete from pessoa where nome = '" + p.nome + "'");
+            System.out.println("Excluiu uma pessoa");
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    @Override
+    public List<Pessoa> ListarPessoa() {
+        List<Pessoa> resultado = new ArrayList<Pessoa>();
+        try {
+            ResultSet resultSet = smt.executeQuery("select * from pessoa");
+            while (resultSet.next()) {
+                Pessoa p = new Pessoa();
+                p.nome = resultSet.getString("NOME");
+                p.contato = resultSet.getString("CONTATO");
+                resultado.add(p);
+            }
+            return resultado;
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+            return null;
+        }
+    }
+
+    @Override
+    public void SalvarCarro(Carro c) {
+        try (PreparedStatement ps = connection.prepareStatement("insert into carro (placa, modelo, ano, cor) values (?, ?, ?, ?)")) {
+            ps.setString(1, c.placa);
+            ps.setString(2, c.modelo);
+            ps.setInt(3, c.ano);
+            ps.setString(4, c.cor);
+            ps.executeUpdate();
+            System.out.println("Inseriu um carro");
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    @Override
+    public void ExcluirCarro(Carro c) {
+        try (PreparedStatement ps = connection.prepareStatement("delete from carro where placa = ?")) {
+            ps.setString(1, c.placa);
+            ps.executeUpdate();
+            System.out.println("Excluiu um carro");
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    @Override
+    public List<Carro> ListarCarro() {
+        List<Carro> resultado = new ArrayList<Carro>();
+        try (ResultSet resultSet = smt.executeQuery("select * from carro")) {
+            while (resultSet.next()) {
+                Carro carro = new Carro();
+                carro.placa = resultSet.getString("PLACA");
+                carro.modelo = resultSet.getString("MODELO");
+                carro.ano = resultSet.getInt("ANO");
+                carro.cor = resultSet.getString("COR");
+                resultado.add(carro);
+            }
+            return resultado;
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+            return null;
+        }
+    }
+}
