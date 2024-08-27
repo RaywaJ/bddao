@@ -1,0 +1,43 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class MemoriaClienteDAO implements IBancoDAO {
+
+    private List<Pessoa> bancoMemoriaPessoa;
+    private List<Carro> bancoMemoriaCarro;
+
+    public MemoriaClienteDAO() {
+        bancoMemoriaPessoa = new ArrayList<Pessoa>();
+        bancoMemoriaCarro = new ArrayList<Carro>();
+    }
+
+    @Override
+    public void SalvarPessoa(Pessoa p) {
+        bancoMemoriaPessoa.add(p);
+    }
+
+    @Override
+    public void ExcluirPessoa(Pessoa p) {
+        bancoMemoriaPessoa.remove(p);
+    }
+
+    @Override
+    public List<Pessoa> ListarPessoa() {
+        return bancoMemoriaPessoa;
+    }
+
+    @Override
+    public void SalvarCarro(Carro c) {
+        bancoMemoriaCarro.add(c);
+    }
+
+    @Override
+    public void ExcluirCarro(Carro c) {
+        bancoMemoriaCarro.remove(c);
+    }
+
+    @Override
+    public List<Carro> ListarCarro() {
+        return bancoMemoriaCarro;
+    }
+}
